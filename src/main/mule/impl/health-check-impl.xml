@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="health-check-impl-main" doc:id="06e6581d-f7ba-4e08-80c3-f69fa3f10339" >
+		<flow-ref doc:name="Status BD Check" doc:id="bfae8b73-bcde-4bd4-83c4-28fbca3470ba" name="health-check-db-impl" target="StatusBD"/>
+		<ee:transform doc:name="Transform Message" doc:id="4ca6e32e-8af0-4968-89eb-65ebf9902a24" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    api_rest: {
+        nome: "API Cadastro Clientes",
+        status: "OK"
+    },
+    banco_de_dados: {
+        nome: "Postgresql Heroku",
+        status: vars.StatusBD
+    }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="health-check-db-impl" doc:id="5aea9b58-b74e-4756-8c20-9859237d59bc" >
+		<try doc:name="Try" doc:id="b5ac8869-0e42-4870-9a7d-07b40a70b3b4" >
+			<db:select doc:name="Select" doc:id="74b12200-9edf-4845-bea7-6d0d5e5b9798" config-ref="Database_Config">
+			<db:sql><![CDATA[select 0]]></db:sql>
+		</db:select>
+			<set-payload value="OK" doc:name="Status OK" doc:id="17ff7d2c-6cb8-41cc-b315-1236e3449408" />
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="1aa10976-d17b-46af-bfe5-a9d1ffdb0d9a" >
+					<set-payload value='#["NOK" ++ error.description as String  default error.errorMessage as String]' doc:name="Status OK" doc:id="6251f170-ace0-44c3-87a0-9fd4e13fc6e9" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+	</sub-flow>
+</mule>

@@ -129,7 +129,7 @@ output application/json
         </error-handler>
     </flow>
     <flow name="get:\health-check:api-mulesoft-clients-register-config">
-        <logger level="INFO" message="get:\health-check:api-mulesoft-clients-register-config" />
+		<flow-ref doc:name="Health Check Main" doc:id="cc5f3b24-ce69-4367-9b9b-dffffbcee7a8" name="health-check-impl-main"/>
     </flow>
     <flow name="get:\cliente\(id):api-mulesoft-clients-register-config">
         <ee:transform>
