@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<sub-flow name="create-client-impl-main" doc:id="9b3039ec-4f1d-4cd1-8b9f-c06301a64620">
+		<flow-ref doc:name="Save Table Client" doc:id="a1c68f3c-149d-49f1-b6b5-f6920a31708f" name="create-client-impl"/>
+		<flow-ref doc:name="Save Table Address" doc:id="6dfe47ec-6f6b-495a-92c3-5176f2573915" name="create-address-impl"/>
+		<flow-ref doc:name="Save Table Phone" doc:id="d7c00c51-d66a-4abc-8ea5-ad436f0d4ef0" name="create-phone-number-impl"/>
+		<ee:transform doc:name="Transform Message" doc:id="764c8350-bd85-4f0c-b3dc-f7d80cba32c5">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "Criado com sucesso!",
+	id_client: vars.idClient
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	
+	</sub-flow>
+	<sub-flow name="create-client-impl" doc:id="fdd59033-e58d-4d6b-bf51-5b8bdfd84f84" >
+		<ee:transform doc:name="Transform Message" doc:id="4df5f9a0-ae2a-4e2c-bf3d-435e609115e5">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+
+---
+{
+	Nome: vars.varInput.nome,
+	Sobrenome: vars.varInput.sobrenome
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:insert doc:name="Insert Client" doc:id="3c53454f-416e-4c24-b3d0-9cad0399a0ef" config-ref="Database_Config" autoGenerateKeys="true">
+			<db:sql><![CDATA[INSERT INTO public.client(
+	name, lastname)
+VALUES (:Nome, :Sobrenome) RETURNING id_client;]]></db:sql>
+			<db:input-parameters><![CDATA[#[payload]]]></db:input-parameters>
+			<db:auto-generated-keys-column-names>
+				<db:auto-generated-keys-column-name value="id_client" />
+			</db:auto-generated-keys-column-names>
+		</db:insert>
+		<set-variable value="#[(payload.generatedKeys.id_client default 0) as String]" doc:name="Id Client" doc:id="14a3eb47-e161-432c-90d2-9436075ec869" variableName="idClient"/>
+	</sub-flow>
+	<sub-flow name="create-address-impl" doc:id="31f7bfc9-048e-4344-8faf-03b6941549bd" >
+		<ee:transform doc:name="Transform Message" doc:id="9af80487-76b3-4bea-a698-16ab30579097" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+var endereco = vars.varInput.endereco
+---
+{
+	pId_cliente: vars.idClient,
+	pCep: endereco.cep default "",
+	pCidade: endereco.cidade,
+	pEstado: endereco.estado,
+	pRua: endereco.rua
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:insert doc:name="Insert Endereco" doc:id="489859f8-7ad8-4d14-a83a-f785736cdf2c" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO public.address(
+	id_client, zip_code, city, uf, street)
+VALUES (:pId_cliente, :pCep, :pCidade, :pEstado, :pRua);]]></db:sql>
+			<db:input-parameters ><![CDATA[#[payload]]]></db:input-parameters>
+			<db:auto-generated-keys-column-names >
+				<db:auto-generated-keys-column-name value="id_client" />
+			</db:auto-generated-keys-column-names>
+		</db:insert>
+	</sub-flow>
+	<sub-flow name="create-phone-number-impl" doc:id="b3f1a038-9340-4f7c-b801-ece06cf5f3e8" >
+		<ee:transform doc:name="Transform Message" doc:id="f5d4e45c-b1a6-4ff2-958c-777fcccd61df" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+var phones = vars.varInput.telefones
+---
+phones map (
+		{
+			pId_cliente: vars.idClient,
+			pNumero_telefone: ($.ddd as String default "") ++ ($.numero as String default "") 			
+		}
+	)
+]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="test" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<db:bulk-insert doc:name="Bulk insert Phones" doc:id="5b669509-a456-4fef-a7b0-6eaa0a95d79b" config-ref="Database_Config" transactionalAction="NOT_SUPPORTED">
+			<db:sql ><![CDATA[INSERT INTO public.phone(
+	id_client, phone_number)
+VALUES (:pId_cliente, :pNumero_telefone);]]></db:sql>
+		</db:bulk-insert>
+	</sub-flow>
+</mule>

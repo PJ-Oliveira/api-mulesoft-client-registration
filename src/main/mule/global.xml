@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="aaeec9d1-24e5-4ac8-b430-3a50edd5228f" >
+		<db:generic-connection url="jdbc:postgresql://ec2-107-22-238-112.compute-1.amazonaws.com:5432/db38mc6qjue3au" driverClassName="org.postgresql.Driver" user="gctcumdxvhrakt" password="b23f43b31dc8643035ccf04274b45b880dffce16444fe6f4c9fde574f485de8c" />
+	</db:config>
+</mule>
