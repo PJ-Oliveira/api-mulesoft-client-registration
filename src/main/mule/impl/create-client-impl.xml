@@ -56,18 +56,18 @@ output application/java
 var endereco = vars.varInput.endereco
 ---
 {
-	pId_cliente: vars.idClient,
-	pCep: endereco.cep default "",
-	pCidade: endereco.cidade,
-	pEstado: endereco.estado,
-	pRua: endereco.rua
+	Id_cliente: vars.idClient,
+	Cep: endereco.cep default "",
+	Cidade: endereco.cidade,
+	Estado: endereco.estado,
+	Rua: endereco.rua
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<db:insert doc:name="Insert Endereco" doc:id="489859f8-7ad8-4d14-a83a-f785736cdf2c" config-ref="Database_Config">
 			<db:sql ><![CDATA[INSERT INTO public.address(
 	id_client, zip_code, city, uf, street)
-VALUES (:pId_cliente, :pCep, :pCidade, :pEstado, :pRua);]]></db:sql>
+VALUES (:Id_cliente, :Cep, :Cidade, :Estado, :Rua);]]></db:sql>
 			<db:input-parameters ><![CDATA[#[payload]]]></db:input-parameters>
 			<db:auto-generated-keys-column-names >
 				<db:auto-generated-keys-column-name value="id_client" />
@@ -83,8 +83,8 @@ var phones = vars.varInput.telefones
 ---
 phones map (
 		{
-			pId_cliente: vars.idClient,
-			pNumero_telefone: ($.ddd as String default "") ++ ($.numero as String default "") 			
+			Id_cliente: vars.idClient,
+			Numero_telefone: ($.ddd as String default "") ++ ($.numero as String default "") 			
 		}
 	)
 ]]></ee:set-payload>
@@ -100,7 +100,7 @@ output application/java
 		<db:bulk-insert doc:name="Bulk insert Phones" doc:id="5b669509-a456-4fef-a7b0-6eaa0a95d79b" config-ref="Database_Config" transactionalAction="NOT_SUPPORTED">
 			<db:sql ><![CDATA[INSERT INTO public.phone(
 	id_client, phone_number)
-VALUES (:pId_cliente, :pNumero_telefone);]]></db:sql>
+VALUES (:Id_cliente, :Numero_telefone);]]></db:sql>
 		</db:bulk-insert>
 	</sub-flow>
 </mule>

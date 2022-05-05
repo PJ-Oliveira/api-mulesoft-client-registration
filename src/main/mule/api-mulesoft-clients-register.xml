@@ -134,10 +134,10 @@ output application/json
     <flow name="get:\cliente\(id):api-mulesoft-clients-register-config">
         <ee:transform>
             <ee:variables>
-                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+				<ee:set-variable variableName="id_cliente" ><![CDATA[attributes.uriParams.'id']]></ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <logger level="INFO" message="get:\cliente\(id):api-mulesoft-clients-register-config" />
+		<flow-ref doc:name="Get Client" doc:id="4e637516-90c6-4baa-ae85-ff28a2604ee2" name="get-client-impl-getter-main"/>
     </flow>
     <flow name="post:\cliente:application\json:api-mulesoft-clients-register-config">
 		<flow-ref doc:name="Save Client Impl" doc:id="df15b719-a3cc-43e7-a09f-dc2d3acc37e6" name="create-client-impl-main"/>
